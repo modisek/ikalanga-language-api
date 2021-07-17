@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ikalanga dictionary</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a class="navbar-item" href="https://bulma.io">
+      <img src="https://bulma.io/images/bulma-logo.png" width="112" height="28">
+    </a>
+
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+
+  <div id="navbarBasicExample" class="navbar-menu">
+    <div class="navbar-start">
+      <a class="navbar-item" href="#">
+        Home
+      </a>
+
+      <a class="navbar-item" href="api">
+        Api
+      </a>
+
+      </div>
+
+    <div class="navbar-end">
+      <div class="navbar-item">
+        <div class="buttons">
+          <a class="button is-primary">
+            <strong>Sign up</strong>
+          </a>
+          <a class="button is-light">
+            Log in
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+    <section class="section">
+      <div class="container">
+        <h1 class="title">Ikalanga dictionary</h1>
+        <h3 class="title is-4">Search</h3>
+        <p class="subtitle is-5">search for a word to see its definition</p>
+        <div class="field has-addons">
+          <div class="control">
+            <input class="input" type="text" placeholder="word" />
+          </div>
+          <div class="control">
+            <a class=" btnSearch button is-info"> Search </a>
+          </div>
+        </div>
+        <div class="show_results">
+                <h3 class="heading_res"> </h3>
+                <p class="content_res"></p>
+                
+        </div>
+<h3 class ="title is-4">All the words</h3>
+<p class = "subtitle is-5">alphabetical order</p>
+<div class="pagination">
+  <div class="tableList" id="listingTable"></div>
+  <div class="pagination-block">
+    <span class=" button pageButton outline-none" id="button_prev">Prev</span>
+    <span id="page_number" class="outline-none"></span>
+    <span class="button pageButton outline-none" id="button_next">Next</span>
+  </div>
+</div>
+      </div>
+    </section>
+    <script>
+           const arr = [];
+window.addEventListener('DOMContentLoaded', (event) => {
+                    getAllWord();
+});
+            const getAllWord = async () => {
+                                const url = await fetch('http://localhost:3000/api/v1/words');
+                                const res = await url.json();
+
+                             //  for (const item in res.content) {
+                               //  console.log(item)
+                                //}
+                                res.content.forEach(s=> 
+                                                    arr.push(s.word+" - "+s.definition)
+                                                                )
+ 
+                               console.log(arr)
+                        }
+      const getFromApi = async (keyword) => {
+                          const resp = await fetch(`http://localhost:3000/api/v1/word/${keyword}`);
+        const result = await resp.json();
+        const [{ word, definition }] = result;
+        console.log(word, definition);
+                          heading_res.textContent = `${search.value}`;
+        content_res.innerText = `${definition}`;
+      };
+        button = document.querySelector('.btnSearch');
+        search = document.querySelector('.input');
+        heading_res = document.querySelector('.heading_res');
+        content_res = document.querySelector('.content_res');
+
+            button.onclick = () =>{
+                                getFromApi(search.value);
+                                
+                        }
+
+(function() {
+    "use strict";
+
+    function Pagination() {
+      
+       const objJson = arr; 
+
+      const prevButton = document.getElementById('button_prev');
+      const nextButton = document.getElementById('button_next');
+      const clickPageNumber = document.querySelectorAll('.clickPageNumber');
+      
+      let current_page = 1;
+      let records_per_page = 7;
+      
+      this.init = function() {
+          changePage(1);
+          pageNumbers();
+          selectedPage();
+          clickPage();
+          addEventListeners();
+     }
+      
+      let addEventListeners = function() {
+          prevButton.addEventListener('click', prevPage);
+          nextButton.addEventListener('click', nextPage);   
+      }
+            
+      let selectedPage = function() {
+          let page_number = document.getElementById('page_number').getElementsByClassName('clickPageNumber'); 
+          for (let i = 0; i < page_number.length; i++) {
+              if (i == current_page - 1) {
+                  page_number[i].style.opacity = "1.0";
+              } 
+              else {
+                  page_number[i].style.opacity = "0.5";
+              }
+          }   
+      }  
+      
+      let checkButtonOpacity = function() {
+        current_page == 1 ? prevButton.classList.add('opacity') : prevButton.classList.remove('opacity');
+        current_page == numPages() ? nextButton.classList.add('opacity') : nextButton.classList.remove('opacity');
+      }
+
+      let changePage = function(page) {
+          const listingTable = document.getElementById('listingTable');
+
+          if (page < 1) {
+              page = 1;
+          } 
+          if (page > (numPages() -1)) {
+              page = numPages();
+          }
+       
+          listingTable.innerHTML = "";
+
+          for(var i = (page -1) * records_per_page; i < (page * records_per_page) && i < objJson.length; i++) {
+              listingTable.innerHTML += "<div class='objectBlock'>" + objJson[i] + "</div>";
+          }
+          checkButtonOpacity();
+          selectedPage();
+      }
+
+      let prevPage = function() {
+          if(current_page > 1) {
+              current_page--;
+              changePage(current_page);
+          }
+      }
+
+      let nextPage = function() {
+          if(current_page < numPages()) {
+              current_page++;
+              changePage(current_page);
+          } 
+      }
+
+      let clickPage = function() {
+          document.addEventListener('click', function(e) {
+              if(e.target.nodeName == "SPAN" && e.target.classList.contains("clickPageNumber")) {
+                  current_page = e.target.textContent;
+                  changePage(current_page);
+              }
+          });
+      }
+
+      let pageNumbers = function() {
+          let pageNumber = document.getElementById('page_number');
+              pageNumber.innerHTML = "";
+
+          for(let i = 1; i < numPages() + 1; i++) {
+              pageNumber.innerHTML += "<span class='clickPageNumber'>" + i + "</span>";
+          }
+      }
+
+      let numPages = function() {
+          return Math.ceil(objJson.length / records_per_page);  
+      }
+   }
+  let pagination = new Pagination();
+  pagination.init();
+})();
+
+
+      </script>
+  </body>
+</html>
